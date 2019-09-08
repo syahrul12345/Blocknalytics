@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"github.com/dustin/go-humanize"
 )
 
 //this is the payload we will send to our Ethereum node
@@ -41,63 +42,84 @@ type ErrorMessage struct {
 	Message string
 }
 
-func Start() (uint64,string,uint64,uint64,string,uint64){
-	// var blockNumber uint64
-	// var networkID string
-	// var peers uint64
-	// var hashRate string
-	// var gasPrice uint64
+type TransactionStruct struct {
+		BlockHash string
+		BlockNumber string
+		From string
+		To string
+		Gas string
+		GasPrice string
+		Hash string
+}
 
-	blockNumber,blockErr := request("eth_blockNumber",nil)
+func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]TransactionStruct){
+	const ethRPC string = "https://adoring-snyder:humped-muster-device-mousy-bauble-appear@nd-806-802-183.p2pify.com"
+	
+	blockNumber,blockErr := request(ethRPC,"eth_blockNumber",nil)
 	if blockErr != nil {
 		panic(blockErr)
 	}
-	currentBlockInfo, blockInfoErr := request("eth_getBlockByNumber",[]interface{}{blockNumber,true})
+	currentBlockInfo, blockInfoErr := request(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
 	if blockInfoErr != nil {
 		panic(blockInfoErr)
 	}
 	currentMap := stringToMap(currentBlockInfo)
 	currentBlock := toInt(currentMap["currentBlock"])
 	
-	prevBlock := "0x" + strconv.FormatInt(int64(currentBlock - 500), 16)
-	prevBlockInfo , prevBlockErr := request("eth_getBlockByNumber",[]interface{}{prevBlock,true})
+	prevBlock := "0x" + strconv.FormatInt(int64(currentBlock - 99), 16)
+	prevBlockInfo , prevBlockErr := request(ethRPC,"eth_getBlockByNumber",[]interface{}{prevBlock,true})
 	if prevBlockErr != nil {
 		panic(prevBlockErr)
 	}
 	
 
 
-	networkID,networkErr := request("net_version",nil)
+	networkID,networkErr := request(ethRPC,"net_version",nil)
 	if networkErr != nil {
 		panic(networkErr)
 	}
 
-	peers,peersErr := request("net_peerCount",nil) 
+	peers,peersErr := request(ethRPC,"net_peerCount",nil) 
 	if peersErr != nil {
 		panic(peersErr)
 	}
 
 
-	gasPrice, gasPriceErr := request("eth_gasPrice",nil)
+	gasPrice, gasPriceErr := request(ethRPC,"eth_gasPrice",nil)
 	if gasPriceErr != nil {
 		panic(gasPriceErr)
 	}
 
-	syncStatus, syncErr := request("eth_syncing",nil)
+	syncStatus, syncErr := request(ethRPC,"eth_syncing",nil)
 	if syncErr != nil {
 		panic(syncErr)
 	}
 	//calculate hashrate
-	prevMap := stringToMap(prevBlockInfo)
-	//calculate the difficulties
-	currentDifficulty := toInt(currentMap["currentDifficulty"])
-	currentTimeStamp := toInt(currentMap["currentTimeStamp"])
-	prevTimeStamp := toInt(prevMap["currentTimeStamp"])
+	var hashRate uint64;
+	if blockInfoErr == nil && prevBlockErr == nil {
+		prevMap := stringToMap(prevBlockInfo)
+		//calculate the difficulties
+		currentDifficulty := toInt(currentMap["currentDifficulty"])
+		currentTimeStamp := toInt(currentMap["currentTimeStamp"])
+		prevTimeStamp := toInt(prevMap["currentTimeStamp"])
+		blocktime := (currentTimeStamp - prevTimeStamp)/99
+		hashRate = currentDifficulty/blocktime
+	}else{
+		hashRate = 0
+	}
 
-	blocktime := (currentTimeStamp - prevTimeStamp)/500
-	hashRate := currentDifficulty/blocktime
+	//get latest transactions in block
+	txInCurrentBlock,txErr := getTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
+	if txErr != nil {
+		panic(txErr)
+	}
 
-	return toInt(blockNumber),networkID,toInt(peers),weiToGwei(toInt(gasPrice)),syncStatus,hashRate
+	pendingNodeTx,pendErr := getTransactionsInBlock(ethRPC,"eth_pendingTransactions",nil)
+	if pendErr != nil {
+		panic(pendErr)
+	}
+	
+	return toInt(blockNumber),networkID,toInt(peers),weiToGwei(toInt(gasPrice)),syncStatus,splitter(hashRate)+"H/s",txInCurrentBlock,pendingNodeTx
 }
 
 func weiToGwei(value uint64) uint64 {
@@ -105,22 +127,10 @@ func weiToGwei(value uint64) uint64 {
 	return gwei
 }
 
-func splitter(value uint64) {
-	names := make(map[string]uint64)
-
-	names["kilo"] = 1000
-	names["mega"] = 1e+6
-	names["giga"] = 1e+9
-	names["tera"] = 1e+12
-	names["penta"] = 1e+15
-
-	count := make(map[string]uint64)
-	count["kilo"] = 0
-	count["mega"] = 0
-	count["giga"] = 0
-	count["tera"] = 0
-	count["penta"] = 0
-	
+func splitter(value uint64) string {
+	//split the string into an array
+	runes := []rune(humanize.Bytes(value))
+	return string(runes[0:(len(runes)-1)])
 }
 
 /**
@@ -138,8 +148,8 @@ func toInt(data string) uint64{
 }
 
 
-func request(method string,params []interface{}) (string,error){
-	const ethRPC string = "https://adoring-snyder:humped-muster-device-mousy-bauble-appear@nd-806-802-183.p2pify.com"
+func request(ethRPC string,method string,params []interface{}) (string,error){
+	
 	
 	if params == nil {
 		params = []interface{}{}
@@ -204,14 +214,10 @@ func request(method string,params []interface{}) (string,error){
 		if err := json.Unmarshal(result["timestamp"], &timeStampHex); err != nil {
 			return "nil", err
 		}
-		var currentBlock = fmt.Sprintf("%v", params[0])
-		var currentDifficulty = difficultyHex
-		var currentTimeStamp = timeStampHex
-
 		var returnValues = make(map[string]string)
-		returnValues["currentBlock"] = currentBlock
-		returnValues["currentDifficulty"] = currentDifficulty
-		returnValues["currentTimeStamp"] = currentTimeStamp
+		returnValues["currentBlock"] = fmt.Sprintf("%v", params[0])
+		returnValues["currentDifficulty"] = difficultyHex
+		returnValues["currentTimeStamp"] = timeStampHex
 		return createKeyValuePairs(returnValues),nil
 	}else {
 		var parsedResponse = new(ParsedResponse)
@@ -223,6 +229,69 @@ func request(method string,params []interface{}) (string,error){
 	}
     
 }
+func getTransactionsInBlock(ethRPC string,method string,params []interface{}) ([]TransactionStruct,error) {
+	if params == nil {
+		params = []interface{}{}
+	}
+
+	payload := &Payload{
+		JsonRpc: "2.0",
+		Method: method,
+		Params: params,
+		Id: 1,
+	}
+	//marshal the payload
+	requestBody,error := json.Marshal(payload)
+	if error != nil {
+		return []TransactionStruct{},error
+	}
+	//send the payload
+	response,error := http.Post(ethRPC,"application/json",bytes.NewBuffer(requestBody))
+	if error!= nil {
+		return []TransactionStruct{},error
+	}
+
+	//close the payload
+	defer response.Body.Close()
+
+	//read the response
+	body, error := ioutil.ReadAll(response.Body)
+	if error != nil {
+		return []TransactionStruct{},error
+	}
+	var parsedResponse = new(ParsedResponseReceipt)
+	err := json.Unmarshal(body, &parsedResponse)
+	if(error != nil){
+        return []TransactionStruct{},err
+    }
+
+    if method == "eth_pendingTransactions" {
+    	var transactions = []TransactionStruct{}
+    	err2 := json.Unmarshal(parsedResponse.Result, &transactions)
+	    if err2 != nil {
+	    	return []TransactionStruct{},err2
+	    }
+	    return transactions,nil
+
+    }else{
+    	result := make(map[string]json.RawMessage)
+	    err2 := json.Unmarshal(parsedResponse.Result, &result)
+	    if err2 != nil {
+	    	return []TransactionStruct{},err2
+	    }
+
+	    //lets initialzie an array of structs
+	    var transactions = []TransactionStruct{}
+		err3 := json.Unmarshal(result["transactions"],&transactions)
+		if err3 != nil {
+			return []TransactionStruct{},err3
+		}
+	    return transactions,nil
+    }
+    
+}
+
+
 func createKeyValuePairs(m map[string]string) string {
     b := new(bytes.Buffer)
     for key, value := range m {

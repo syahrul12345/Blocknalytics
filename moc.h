@@ -17,7 +17,7 @@ struct Moc_PackedString { char* data; long long len; };
 struct Moc_PackedList { void* data; long long len; };
 void QmlBridge092563_ConnectLoad(void* ptr);
 void QmlBridge092563_DisconnectLoad(void* ptr);
-void QmlBridge092563_Load(void* ptr, unsigned long long blockNumber, struct Moc_PackedString networkId, unsigned long long peers, unsigned long long gasPrice, struct Moc_PackedString sync, unsigned long long hashrate);
+void QmlBridge092563_Load(void* ptr, unsigned long long blockNumber, struct Moc_PackedString networkId, unsigned long long peers, unsigned long long gasPrice, struct Moc_PackedString sync, struct Moc_PackedString hashRate, int txInCurrentBlockNo, int pendingNodeTxNo);
 int QmlBridge092563_QmlBridge092563_QRegisterMetaType();
 int QmlBridge092563_QmlBridge092563_QRegisterMetaType2(char* typeName);
 int QmlBridge092563_QmlBridge092563_QmlRegisterType();

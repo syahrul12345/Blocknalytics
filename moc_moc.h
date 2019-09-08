@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_QmlBridge092563_t {
-    QByteArrayData data[9];
-    char stringdata0[73];
+    QByteArrayData data[11];
+    char stringdata0[108];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -39,11 +39,14 @@ QT_MOC_LITERAL(4, 34, 9), // "networkId"
 QT_MOC_LITERAL(5, 44, 5), // "peers"
 QT_MOC_LITERAL(6, 50, 8), // "gasPrice"
 QT_MOC_LITERAL(7, 59, 4), // "sync"
-QT_MOC_LITERAL(8, 64, 8) // "hashrate"
+QT_MOC_LITERAL(8, 64, 8), // "hashRate"
+QT_MOC_LITERAL(9, 73, 18), // "txInCurrentBlockNo"
+QT_MOC_LITERAL(10, 92, 15) // "pendingNodeTxNo"
 
     },
     "QmlBridge092563\0load\0\0blockNumber\0"
-    "networkId\0peers\0gasPrice\0sync\0hashrate"
+    "networkId\0peers\0gasPrice\0sync\0hashRate\0"
+    "txInCurrentBlockNo\0pendingNodeTxNo"
 };
 #undef QT_MOC_LITERAL
 
@@ -61,10 +64,10 @@ static const uint qt_meta_data_QmlBridge092563[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    6,   19,    2, 0x06 /* Public */,
+       1,    8,   19,    2, 0x06 /* Public */,
 
  // signals: parameters
-    QMetaType::Void, QMetaType::ULongLong, QMetaType::QString, QMetaType::ULongLong, QMetaType::ULongLong, QMetaType::QString, QMetaType::ULongLong,    3,    4,    5,    6,    7,    8,
+    QMetaType::Void, QMetaType::ULongLong, QMetaType::QString, QMetaType::ULongLong, QMetaType::ULongLong, QMetaType::QString, QMetaType::QString, QMetaType::Int, QMetaType::Int,    3,    4,    5,    6,    7,    8,    9,   10,
 
        0        // eod
 };
@@ -75,13 +78,13 @@ void QmlBridge092563::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         auto *_t = static_cast<QmlBridge092563 *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->load((*reinterpret_cast< quint64(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< quint64(*)>(_a[3])),(*reinterpret_cast< quint64(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])),(*reinterpret_cast< quint64(*)>(_a[6]))); break;
+        case 0: _t->load((*reinterpret_cast< quint64(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< quint64(*)>(_a[3])),(*reinterpret_cast< quint64(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])),(*reinterpret_cast< QString(*)>(_a[6])),(*reinterpret_cast< qint32(*)>(_a[7])),(*reinterpret_cast< qint32(*)>(_a[8]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            using _t = void (QmlBridge092563::*)(quint64 , QString , quint64 , quint64 , QString , quint64 );
+            using _t = void (QmlBridge092563::*)(quint64 , QString , quint64 , quint64 , QString , QString , qint32 , qint32 );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&QmlBridge092563::load)) {
                 *result = 0;
                 return;
@@ -131,9 +134,9 @@ int QmlBridge092563::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void QmlBridge092563::load(quint64 _t1, QString _t2, quint64 _t3, quint64 _t4, QString _t5, quint64 _t6)
+void QmlBridge092563::load(quint64 _t1, QString _t2, quint64 _t3, quint64 _t4, QString _t5, QString _t6, qint32 _t7, qint32 _t8)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t4))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t5))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t6))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t4))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t5))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t6))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t7))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t8))) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_WARNING_POP

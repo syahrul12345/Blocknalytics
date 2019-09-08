@@ -90,14 +90,14 @@ func callbackQmlBridge092563_Constructor(ptr unsafe.Pointer) {
 }
 
 //export callbackQmlBridge092563_Load
-func callbackQmlBridge092563_Load(ptr unsafe.Pointer, blockNumber C.ulonglong, networkId C.struct_Moc_PackedString, peers C.ulonglong, gasPrice C.ulonglong, sync C.struct_Moc_PackedString, hashrate C.ulonglong) {
+func callbackQmlBridge092563_Load(ptr unsafe.Pointer, blockNumber C.ulonglong, networkId C.struct_Moc_PackedString, peers C.ulonglong, gasPrice C.ulonglong, sync C.struct_Moc_PackedString, hashRate C.struct_Moc_PackedString, txInCurrentBlockNo C.int, pendingNodeTxNo C.int) {
 	if signal := qt.GetSignal(ptr, "load"); signal != nil {
-		(*(*func(uint64, string, uint64, uint64, string, uint64))(signal))(uint64(blockNumber), cGoUnpackString(networkId), uint64(peers), uint64(gasPrice), cGoUnpackString(sync), uint64(hashrate))
+		(*(*func(uint64, string, uint64, uint64, string, string, int, int))(signal))(uint64(blockNumber), cGoUnpackString(networkId), uint64(peers), uint64(gasPrice), cGoUnpackString(sync), cGoUnpackString(hashRate), int(int32(txInCurrentBlockNo)), int(int32(pendingNodeTxNo)))
 	}
 
 }
 
-func (ptr *QmlBridge) ConnectLoad(f func(blockNumber uint64, networkId string, peers uint64, gasPrice uint64, sync string, hashrate uint64)) {
+func (ptr *QmlBridge) ConnectLoad(f func(blockNumber uint64, networkId string, peers uint64, gasPrice uint64, sync string, hashRate string, txInCurrentBlockNo int, pendingNodeTxNo int)) {
 	if ptr.Pointer() != nil {
 
 		if !qt.ExistsSignal(ptr.Pointer(), "load") {
@@ -105,9 +105,9 @@ func (ptr *QmlBridge) ConnectLoad(f func(blockNumber uint64, networkId string, p
 		}
 
 		if signal := qt.LendSignal(ptr.Pointer(), "load"); signal != nil {
-			f := func(blockNumber uint64, networkId string, peers uint64, gasPrice uint64, sync string, hashrate uint64) {
-				(*(*func(uint64, string, uint64, uint64, string, uint64))(signal))(blockNumber, networkId, peers, gasPrice, sync, hashrate)
-				f(blockNumber, networkId, peers, gasPrice, sync, hashrate)
+			f := func(blockNumber uint64, networkId string, peers uint64, gasPrice uint64, sync string, hashRate string, txInCurrentBlockNo int, pendingNodeTxNo int) {
+				(*(*func(uint64, string, uint64, uint64, string, string, int, int))(signal))(blockNumber, networkId, peers, gasPrice, sync, hashRate, txInCurrentBlockNo, pendingNodeTxNo)
+				f(blockNumber, networkId, peers, gasPrice, sync, hashRate, txInCurrentBlockNo, pendingNodeTxNo)
 			}
 			qt.ConnectSignal(ptr.Pointer(), "load", unsafe.Pointer(&f))
 		} else {
@@ -123,7 +123,7 @@ func (ptr *QmlBridge) DisconnectLoad() {
 	}
 }
 
-func (ptr *QmlBridge) Load(blockNumber uint64, networkId string, peers uint64, gasPrice uint64, sync string, hashrate uint64) {
+func (ptr *QmlBridge) Load(blockNumber uint64, networkId string, peers uint64, gasPrice uint64, sync string, hashRate string, txInCurrentBlockNo int, pendingNodeTxNo int) {
 	if ptr.Pointer() != nil {
 		var networkIdC *C.char
 		if networkId != "" {
@@ -135,7 +135,12 @@ func (ptr *QmlBridge) Load(blockNumber uint64, networkId string, peers uint64, g
 			syncC = C.CString(sync)
 			defer C.free(unsafe.Pointer(syncC))
 		}
-		C.QmlBridge092563_Load(ptr.Pointer(), C.ulonglong(blockNumber), C.struct_Moc_PackedString{data: networkIdC, len: C.longlong(len(networkId))}, C.ulonglong(peers), C.ulonglong(gasPrice), C.struct_Moc_PackedString{data: syncC, len: C.longlong(len(sync))}, C.ulonglong(hashrate))
+		var hashRateC *C.char
+		if hashRate != "" {
+			hashRateC = C.CString(hashRate)
+			defer C.free(unsafe.Pointer(hashRateC))
+		}
+		C.QmlBridge092563_Load(ptr.Pointer(), C.ulonglong(blockNumber), C.struct_Moc_PackedString{data: networkIdC, len: C.longlong(len(networkId))}, C.ulonglong(peers), C.ulonglong(gasPrice), C.struct_Moc_PackedString{data: syncC, len: C.longlong(len(sync))}, C.struct_Moc_PackedString{data: hashRateC, len: C.longlong(len(hashRate))}, C.int(int32(txInCurrentBlockNo)), C.int(int32(pendingNodeTxNo)))
 	}
 }
 

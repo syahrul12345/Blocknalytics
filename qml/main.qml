@@ -41,7 +41,7 @@ ApplicationWindow {
             }
             Text {
                 id: blockHeight
-                text: "20000000"
+                text: ""
                 font.pixelSize: 40
                 color:"white"
             }
@@ -57,7 +57,7 @@ ApplicationWindow {
             }
             Text {
                 id:networkID
-                text:"61"
+                text:""
                 font.pixelSize: 40
                 color:"white"
             }
@@ -102,7 +102,7 @@ ApplicationWindow {
                 color:"white"
             }
             Text {
-                id: hashRate
+                id: hashRateText
                 text: ""
                 font.pixelSize: 40
                 color:"white"
@@ -116,9 +116,9 @@ ApplicationWindow {
                 font.pixelSize: 20
                 color:"white"
             }
-            Label {
+            Text {
                 id: pendingTransactions
-                text: "2"
+                text: ""
                 font.pixelSize: 40
                 color:"white"
             }
@@ -200,9 +200,10 @@ ApplicationWindow {
             networkID.text = networkId
             peerCount.text = peers
             syncStatus.text
-            gas.text = gasPrice + "GWEI"
+            gas.text = gasPrice + " GWEI"
             syncStatus.text = sync
-            hashRate.text = hashrate
+            hashRateText.text = hashRate
+            pendingTransactions.text = pendingNodeTxNo
 
         }
     }
