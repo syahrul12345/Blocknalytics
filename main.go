@@ -6,6 +6,7 @@ import (
 	"github.com/therecipe/qt/qml"
 	"github.com/therecipe/qt/quickcontrols2"
 	"github.com/therecipe/qt/core"
+	"fmt"
 	"github.com/syahrul12345/Blocknalytics/packages"
 	
 )
@@ -22,7 +23,7 @@ type QmlBridge struct {
 
 
 func main() {
-	// useful for devices with high pixel density displays
+		// useful for devices with high pixel density displays
 	// such as smartphones, retina displays, ...
 	core.QCoreApplication_SetAttribute(core.Qt__AA_EnableHighDpiScaling, true)
 
@@ -55,9 +56,11 @@ func main() {
 		
 	}()
 
+
 	// start the main Qt event loop
 	// and block until app.Exit() is called
 	// or the window is closed by the user
 	gui.QGuiApplication_Exec()
 }
+
 
