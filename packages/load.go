@@ -73,7 +73,6 @@ func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]Tr
 	}
 	
 
-
 	networkID,networkErr := request(ethRPC,"net_version",nil)
 	if networkErr != nil {
 		panic(networkErr)
