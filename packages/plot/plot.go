@@ -1,17 +1,21 @@
 package main
 
 import (
-	// "image/color"
-	// "math/rand"
-	// "gonum.org/v1/plot"
-	// "gonum.org/v1/plot/plotter"
-	// "gonum.org/v1/plot/vg"
-	// "gonum.org/v1/plot/vg/draw"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/plotutil"
+	"gonum.org/v1/plot/vg"
 	"fmt"
 	"github.com/syahrul12345/Blocknalytics/packages/load"
 	"strconv"
+	"sort"
 	
 )
+
+type TxCountStruct struct {
+	BlockNumber uint64
+	TxCount int
+}
 
 
 func main() {
@@ -23,90 +27,73 @@ func main() {
 	if blockErr != nil {
 		panic(blockErr)
 	}
-	fmt.Println("the latest block is: ",toInt(blockNumber))
-	txChan := make(chan int)
-	blockChan := make(chan uint64)
+	txChan := make(chan TxCountStruct)
 	for selectedBlock := toInt(blockNumber) - 99;selectedBlock<toInt(blockNumber);selectedBlock++ {
 		blockHex := toHex(selectedBlock)
-		go makeRequest(ethRPC,blockHex,txChan,blockChan)
+		go makeRequest(ethRPC,blockHex,txChan)
 	}
-	//wait for all of it to be done
-	for i := range(txChan) {
-		fmt.Println(i)
+	var transaction99Map = make(map[uint64]int)
+	var txChanCount = 1
+	for currentMap := range(txChan) {
+		if txChanCount == 99 {
+			transaction99Map[currentMap.BlockNumber] = currentMap.TxCount
+			close(txChan)
+		}else{
+			txChanCount++
+			transaction99Map[currentMap.BlockNumber] = currentMap.TxCount
+		}
 	}
-	for i := range(blockChan) {
-		fmt.Println(i)
-	}
-	// txInCurrentBlock,txErr := load.GetTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
-	// if txErr != nil {
-	// 	panic(txErr)
-	// }
-	// fmt.Println(txInCurrentBlock)
+	createTransactionCount99(transaction99Map)
 	
-	// rand.Seed(int64(0))
-	// n := 15
-	// scatterData := randomPoints(n)
-	// lineData := randomPoints(n)
-	// linePointsData := randomPoints(n)
+	// Create a new plot, set its title and
+	// axis labels.
+	
 
-	// // Create a new plot, set its title and
-	// // axis labels.
-	// p, err := plot.New()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// p.Title.Text = "Points Example"
-	// p.X.Label.Text = "X"
-	// p.Y.Label.Text = "Y"
-	// // Draw a grid behind the data
-	// p.Add(plotter.NewGrid())
-
-	// // Make a scatter plotter and set its style.
-	// s, err := plotter.NewScatter(scatterData)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// s.GlyphStyle.Color = color.RGBA{R: 255, B: 128, A: 255}
-
-	// // Make a line plotter and set its style.
-	// l, err := plotter.NewLine(lineData)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// l.LineStyle.Width = vg.Points(1)
-	// l.LineStyle.Dashes = []vg.Length{vg.Points(5), vg.Points(5)}
-	// l.LineStyle.Color = color.RGBA{B: 255, A: 255}
-
-	// // Make a line plotter with points and set its style.
-	// lpLine, lpPoints, err := plotter.NewLinePoints(linePointsData)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// lpLine.Color = color.RGBA{G: 255, A: 255}
-	// lpPoints.Shape = draw.PyramidGlyph{}
-	// lpPoints.Color = color.RGBA{R: 255, A: 255}
-
-	// // Add the plotters to the plot, with a legend
-	// // entry for each
-	// p.Add(s, l, lpLine, lpPoints)
-	// p.Legend.Add("scatter", s)
-	// p.Legend.Add("line", l)
-	// p.Legend.Add("line points", lpLine, lpPoints)
-
-	// // Save the plot to a PNG file.
-	// if err := p.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
-	// 	panic(err)
-	// }
+	
 }
 
-func makeRequest(ethRPC string,blockHex string,txChan chan<-int,blockChan chan<- uint64) {
+func createTransactionCount99(transaction99Map map[uint64]int) {
+	pts := make(plotter.XYs, len(transaction99Map))
+	var keys []int
+	//sorts the keys
+	for key := range transaction99Map {
+		keys = append(keys,int(key))
+	}
+	sort.Ints(keys)
+	var ptsCount = 0
+	for _,key := range keys {
+		pts[ptsCount].X = float64(key)
+		pts[ptsCount].Y = float64(transaction99Map[uint64(key)])
+		ptsCount++
+	}
+
+	p, err := plot.New()
+	if err != nil {
+		panic(err)
+	}
+	p.Title.Text = "Transaction Count in last 99 blocks"
+	p.X.Label.Text = "Block Number"
+	p.Y.Label.Text = "Transaction Count"
+	// Draw a grid behind the data
+	err = plotutil.AddLinePoints(p,pts)
+	if err != nil {
+		panic(err)
+	}
+	// Save the plot to a PNG file.
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "points.png"); err != nil {
+		panic(err)
+	}
+}
+
+func makeRequest(ethRPC string,blockHex string,txChan chan TxCountStruct) {
 	txInCurrentBlock,txErr := load.GetTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockHex,true})
 	if txErr != nil {
 		panic(txErr)
 	}
-	fmt.Println(toInt(blockHex))
-	blockChan <- toInt(blockHex)
-	txChan <- len(txInCurrentBlock)
+	var tempStruct = new(TxCountStruct)
+	tempStruct.BlockNumber = toInt(blockHex)
+	tempStruct.TxCount = len(txInCurrentBlock)
+	txChan <- *tempStruct
 }
 
 func toInt(data string) uint64{
