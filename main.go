@@ -6,8 +6,7 @@ import (
 	"github.com/therecipe/qt/qml"
 	"github.com/therecipe/qt/quickcontrols2"
 	"github.com/therecipe/qt/core"
-	"fmt"
-	"github.com/syahrul12345/Blocknalytics/packages"
+	"github.com/syahrul12345/Blocknalytics/packages/load"
 	
 )
 

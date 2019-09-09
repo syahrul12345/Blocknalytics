@@ -55,11 +55,11 @@ type TransactionStruct struct {
 func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]TransactionStruct){
 	const ethRPC string = "https://adoring-snyder:humped-muster-device-mousy-bauble-appear@nd-806-802-183.p2pify.com"
 	
-	blockNumber,blockErr := request(ethRPC,"eth_blockNumber",nil)
+	blockNumber,blockErr := Request(ethRPC,"eth_blockNumber",nil)
 	if blockErr != nil {
 		panic(blockErr)
 	}
-	currentBlockInfo, blockInfoErr := request(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
+	currentBlockInfo, blockInfoErr := Request(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
 	if blockInfoErr != nil {
 		panic(blockInfoErr)
 	}
@@ -67,29 +67,29 @@ func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]Tr
 	currentBlock := toInt(currentMap["currentBlock"])
 	
 	prevBlock := "0x" + strconv.FormatInt(int64(currentBlock - 99), 16)
-	prevBlockInfo , prevBlockErr := request(ethRPC,"eth_getBlockByNumber",[]interface{}{prevBlock,true})
+	prevBlockInfo , prevBlockErr := Request(ethRPC,"eth_getBlockByNumber",[]interface{}{prevBlock,true})
 	if prevBlockErr != nil {
 		panic(prevBlockErr)
 	}
 	
 
-	networkID,networkErr := request(ethRPC,"net_version",nil)
+	networkID,networkErr := Request(ethRPC,"net_version",nil)
 	if networkErr != nil {
 		panic(networkErr)
 	}
 
-	peers,peersErr := request(ethRPC,"net_peerCount",nil) 
+	peers,peersErr := Request(ethRPC,"net_peerCount",nil) 
 	if peersErr != nil {
 		panic(peersErr)
 	}
 
 
-	gasPrice, gasPriceErr := request(ethRPC,"eth_gasPrice",nil)
+	gasPrice, gasPriceErr := Request(ethRPC,"eth_gasPrice",nil)
 	if gasPriceErr != nil {
 		panic(gasPriceErr)
 	}
 
-	syncStatus, syncErr := request(ethRPC,"eth_syncing",nil)
+	syncStatus, syncErr := Request(ethRPC,"eth_syncing",nil)
 	if syncErr != nil {
 		panic(syncErr)
 	}
@@ -108,12 +108,12 @@ func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]Tr
 	}
 
 	//get latest transactions in block
-	txInCurrentBlock,txErr := getTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
+	txInCurrentBlock,txErr := GetTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
 	if txErr != nil {
 		panic(txErr)
 	}
 
-	pendingNodeTx,pendErr := getTransactionsInBlock(ethRPC,"eth_pendingTransactions",nil)
+	pendingNodeTx,pendErr := GetTransactionsInBlock(ethRPC,"eth_pendingTransactions",nil)
 	if pendErr != nil {
 		panic(pendErr)
 	}
@@ -147,8 +147,7 @@ func toInt(data string) uint64{
 }
 
 
-func request(ethRPC string,method string,params []interface{}) (string,error){
-	
+func Request(ethRPC string,method string,params []interface{}) (string,error){
 	
 	if params == nil {
 		params = []interface{}{}
@@ -228,7 +227,7 @@ func request(ethRPC string,method string,params []interface{}) (string,error){
 	}
     
 }
-func getTransactionsInBlock(ethRPC string,method string,params []interface{}) ([]TransactionStruct,error) {
+func GetTransactionsInBlock(ethRPC string,method string,params []interface{}) ([]TransactionStruct,error) {
 	if params == nil {
 		params = []interface{}{}
 	}
