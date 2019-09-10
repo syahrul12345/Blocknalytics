@@ -108,12 +108,12 @@ func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]Tr
 	}
 
 	//get latest transactions in block
-	txInCurrentBlock,txErr := GetTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
+	txInCurrentBlock,_,txErr := GetTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
 	if txErr != nil {
 		panic(txErr)
 	}
 
-	pendingNodeTx,pendErr := GetTransactionsInBlock(ethRPC,"eth_pendingTransactions",nil)
+	pendingNodeTx,_,pendErr := GetTransactionsInBlock(ethRPC,"eth_pendingTransactions",nil)
 	if pendErr != nil {
 		panic(pendErr)
 	}
@@ -227,7 +227,7 @@ func Request(ethRPC string,method string,params []interface{}) (string,error){
 	}
     
 }
-func GetTransactionsInBlock(ethRPC string,method string,params []interface{}) ([]TransactionStruct,error) {
+func GetTransactionsInBlock(ethRPC string,method string,params []interface{}) ([]TransactionStruct,string,error) {
 	if params == nil {
 		params = []interface{}{}
 	}
@@ -241,12 +241,12 @@ func GetTransactionsInBlock(ethRPC string,method string,params []interface{}) ([
 	//marshal the payload
 	requestBody,error := json.Marshal(payload)
 	if error != nil {
-		return []TransactionStruct{},error
+		return []TransactionStruct{},"nil",error
 	}
 	//send the payload
 	response,error := http.Post(ethRPC,"application/json",bytes.NewBuffer(requestBody))
 	if error!= nil {
-		return []TransactionStruct{},error
+		return []TransactionStruct{},"nil",error
 	}
 
 	//close the payload
@@ -255,36 +255,41 @@ func GetTransactionsInBlock(ethRPC string,method string,params []interface{}) ([
 	//read the response
 	body, error := ioutil.ReadAll(response.Body)
 	if error != nil {
-		return []TransactionStruct{},error
+		return []TransactionStruct{},"nil",error
 	}
 	var parsedResponse = new(ParsedResponseReceipt)
 	err := json.Unmarshal(body, &parsedResponse)
 	if(error != nil){
-        return []TransactionStruct{},err
+        return []TransactionStruct{},"nil",err
     }
 
     if method == "eth_pendingTransactions" {
     	var transactions = []TransactionStruct{}
     	err2 := json.Unmarshal(parsedResponse.Result, &transactions)
 	    if err2 != nil {
-	    	return []TransactionStruct{},err2
+	    	return []TransactionStruct{},"nil",err2
 	    }
-	    return transactions,nil
+	    return transactions,"nil",nil
 
     }else{
     	result := make(map[string]json.RawMessage)
 	    err2 := json.Unmarshal(parsedResponse.Result, &result)
 	    if err2 != nil {
-	    	return []TransactionStruct{},err2
+	    	return []TransactionStruct{},"nil",err2
 	    }
 
 	    //lets initialzie an array of structs
 	    var transactions = []TransactionStruct{}
 		err3 := json.Unmarshal(result["transactions"],&transactions)
 		if err3 != nil {
-			return []TransactionStruct{},err3
+			return []TransactionStruct{},"nil",err3
 		}
-	    return transactions,nil
+		var gasUsed string
+		err4 := json.Unmarshal(result["gasUsed"],&gasUsed)
+		if err4 != nil {
+			return []TransactionStruct{},"nil",err4
+		}	
+	    return transactions,gasUsed,nil
     }
     
 }
