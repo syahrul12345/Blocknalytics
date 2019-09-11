@@ -53,15 +53,15 @@ type TransactionStruct struct {
 }
 
 func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]TransactionStruct){
-	const ethRPC string = "https://adoring-snyder:humped-muster-device-mousy-bauble-appear@nd-806-802-183.p2pify.com"
+	const ethRPC string = "https://mainnet.infura.io/v3/2a3f078d3755444b8777a0204e5f694a"
 	
 	blockNumber,blockErr := Request(ethRPC,"eth_blockNumber",nil)
 	if blockErr != nil {
-		panic(blockErr)
+		fmt.Println(blockErr)
 	}
 	currentBlockInfo, blockInfoErr := Request(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
 	if blockInfoErr != nil {
-		panic(blockInfoErr)
+		fmt.Println(blockInfoErr)
 	}
 	currentMap := stringToMap(currentBlockInfo)
 	currentBlock := toInt(currentMap["currentBlock"])
@@ -69,29 +69,29 @@ func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]Tr
 	prevBlock := "0x" + strconv.FormatInt(int64(currentBlock - 99), 16)
 	prevBlockInfo , prevBlockErr := Request(ethRPC,"eth_getBlockByNumber",[]interface{}{prevBlock,true})
 	if prevBlockErr != nil {
-		panic(prevBlockErr)
+		fmt.Println(prevBlockErr)
 	}
 	
 
 	networkID,networkErr := Request(ethRPC,"net_version",nil)
 	if networkErr != nil {
-		panic(networkErr)
+		fmt.Println(networkErr)
 	}
 
 	peers,peersErr := Request(ethRPC,"net_peerCount",nil) 
 	if peersErr != nil {
-		panic(peersErr)
+		fmt.Println(peersErr)
 	}
 
 
 	gasPrice, gasPriceErr := Request(ethRPC,"eth_gasPrice",nil)
 	if gasPriceErr != nil {
-		panic(gasPriceErr)
+		fmt.Print(gasPriceErr)
 	}
 
 	syncStatus, syncErr := Request(ethRPC,"eth_syncing",nil)
 	if syncErr != nil {
-		panic(syncErr)
+		fmt.Println(syncErr)
 	}
 	//calculate hashrate
 	var hashRate uint64;
@@ -110,12 +110,12 @@ func Start() (uint64,string,uint64,uint64,string,string,[]TransactionStruct,[]Tr
 	//get latest transactions in block
 	txInCurrentBlock,_,txErr := GetTransactionsInBlock(ethRPC,"eth_getBlockByNumber",[]interface{}{blockNumber,true})
 	if txErr != nil {
-		panic(txErr)
+		fmt.Println(txErr)
 	}
 
 	pendingNodeTx,_,pendErr := GetTransactionsInBlock(ethRPC,"eth_pendingTransactions",nil)
 	if pendErr != nil {
-		panic(pendErr)
+		fmt.Println(pendErr)
 	}
 	
 	return toInt(blockNumber),networkID,toInt(peers),weiToGwei(toInt(gasPrice)),syncStatus,splitter(hashRate)+"H/s",txInCurrentBlock,pendingNodeTx
@@ -141,7 +141,7 @@ func toInt(data string) uint64{
 	data = string(runes[2:len(runes)])
 	b,err := strconv.ParseUint(data,16,64)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return uint64(b)
 }

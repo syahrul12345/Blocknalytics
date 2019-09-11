@@ -7,6 +7,8 @@ import (
 	"github.com/therecipe/qt/quickcontrols2"
 	"github.com/therecipe/qt/core"
 	"github.com/syahrul12345/Blocknalytics/packages/load"
+	"github.com/syahrul12345/Blocknalytics/packages/plot"
+	"fmt"
 	
 )
 
@@ -22,7 +24,8 @@ type QmlBridge struct {
 
 
 func main() {
-		// useful for devices with high pixel density displays
+	
+	// useful for devices with high pixel density displays
 	// such as smartphones, retina displays, ...
 	core.QCoreApplication_SetAttribute(core.Qt__AA_EnableHighDpiScaling, true)
 
@@ -53,6 +56,17 @@ func main() {
 			qmlBridge.Load(blockNumber,networkId,peers,gasPrice,syncStatus,hashRate,len(txInCurrentBlock),len(pendingNodeTx))
 		}
 		
+	}()
+
+	go func(){
+		for{
+			transaction99Map,gasUsed99Map,err := plot.Plot()
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(transaction99Map)
+			fmt.Println(gasUsed99Map)
+		}
 	}()
 
 
