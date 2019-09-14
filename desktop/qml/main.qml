@@ -1,16 +1,28 @@
-import QtQuick 2.7          //ApplicationWindow
+import QtQuick 2.10          //ApplicationWindow
 import QtQuick.Controls 2.1 //Dialog
+import QtQuick.Controls 1.4	 //TableView
+import CustomQmlTypes 1.0 //CustomTableModel
+import QtQuick.Layouts 1.3 //ColumnLayout
 
 ApplicationWindow {
     id: window
     width: 1280
-    height: 800
+    height: 900
 
     visible: true
     title: "Blocknalytics"
     minimumWidth: 1280
-    minimumHeight: 800
+    minimumHeight: 900
     color:"black"
+
+    Dialog {
+        title: qsTr("Node Settings")
+        id: nodeDialog
+        Label {
+            text: "Change your node endpoints"
+        }
+    }
+
     Row {
         id:headerRow
         x: 1166
@@ -20,7 +32,10 @@ ApplicationWindow {
 
         Button {
             id: button
-            text: qsTr("Node Settings")
+            text: qsTr("Add to table")
+            onClicked: {
+                tableview.model.add(["john", "doe"])
+            }
         }
     }
 
@@ -28,10 +43,10 @@ ApplicationWindow {
         id:mainRow
         x: 14
         y: 64
-        width: 1266
+        width: 995
         height: 73
         spacing:40
-
+        anchors.horizontalCenter: parent.horizontalCenter
         Column {
             id: blockHeightCol
             Label {
@@ -139,75 +154,31 @@ ApplicationWindow {
             }
 
         }
-        
-
     }
-
     Row {
-        id:graphRow
-        topPadding: 10
-        anchors.top: mainRow.bottom
-        anchors.horizontalCenter: mainRow.horizontalCenter
-        spacing:40
-        Column {
-            id: hash99
-            Label {
-                padding: 10
-                text:"Hash rate for the last 99 blocks"
-                font.pixelSize: 18
-                color:"white"
-            }
-        }
+        ColumnLayout {
+            anchors.fill: parent
 
-        Column {
-            id: count99
-            Label {
-                padding: 10
-                text:"Transaction count last 99 blocks"
-                font.pixelSize: 18
-                color:"white"
-            }
-        }
+		TableView {
+			id: tableview
 
-        Column {
-            id: gas99
-            Label {
-                padding: 10
-                text:"Gas Used Last 99 blocks"
-                font.pixelSize: 18
-                color:"white"
-            }
+			Layout.fillWidth: true
+			Layout.fillHeight: true
 
-        }
+			model: CustomTableModel{}
 
-        Column {
-            id: uncle99
-            Label {
-                padding: 10
-                text:"Uncles Last 99 blocks"
-                font.pixelSize: 18
-                color:"white"
-            }
+			TableViewColumn {
+				role: "FirstName"
+				title: role
+			}
 
-        }
-
-    }
-
-    Connections {
-        target: QmlBridge
-        onLoad: {
-            blockHeight.text = blockNumber
-            networkID.text = networkId
-            peerCount.text = peers
-            syncStatus.text
-            gas.text = gasPrice + " GWEI"
-            syncStatus.text = sync
-            hashRateText.text = hashRate
-            pendingTransactions.text = pendingNodeTxNo
-
+			TableViewColumn {
+				role: "LastName"
+				title: role
+			}
+		}
         }
     }
-    
 
     Dialog {
         id: someDialog
@@ -223,7 +194,5 @@ ApplicationWindow {
         }
 
     }
-
-
 
 }

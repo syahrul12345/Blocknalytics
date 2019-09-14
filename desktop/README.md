@@ -1,0 +1,1 @@
+Creation of the desktop application using QT is on hold temporarily due to the difficulty of using QT and it is out of my skillset.
