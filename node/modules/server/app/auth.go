@@ -52,17 +52,21 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		//malformed token, return 403
 		if err != nil {
+			fmt.Println(err)
 			response = utils.Message(false, "Malformed auth token")
 			writer.WriteHeader(http.StatusForbidden)
 			writer.Header().Add("Content-Type", "application/json")
 			utils.Respond(writer, response)
+			return
 		}
 		//token is invalid
 		if !token.Valid {
+			fmt.Println(token.Valid)
 			response = utils.Message(false, "Token is invalid")
 			writer.WriteHeader(http.StatusForbidden)
 			writer.Header().Add("Content-Type", "application/json")
 			utils.Respond(writer, response)
+			return
 		}
 
 		//everything went well

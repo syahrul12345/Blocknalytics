@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -54,21 +53,16 @@ func (acc *Account) Create() map[string]interface{} {
 	if !ok {
 		return response
 	}
-
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(acc.Password), bcrypt.DefaultCost)
 	acc.Password = string(hashedPassword)
-	fmt.Println("before adding to database")
-	fmt.Println(acc)
-
 	//stores the account into the database
 	GetDB().Create(acc)
-	fmt.Println("Added to database")
-	fmt.Println(acc)
+
 	if acc.ID <= 0 {
 		return utils.Message(false, "Failed to create account")
 	}
 	//create a new JWT token
-	tk := &Token{UserID: acc.ID}
+	tk := &Token{UserID: acc.ID, UserName: acc.Email}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	acc.Token = tokenString
@@ -96,10 +90,9 @@ func Login(email, password string) map[string]interface{} {
 	//worked, logged in
 	account.Password = ""
 	//create JWT token
-
-	tk := &Token{}
+	tk := &Token{UserID: account.ID, UserName: account.Email}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-	tokenString, _ := token.SignedString([]byte(os.Getenv("token_pasword")))
+	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
 	account.Token = tokenString
 	resp := utils.Message(true, "Succesfully logged in")
 	resp["account"] = account
